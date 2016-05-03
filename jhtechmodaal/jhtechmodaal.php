@@ -69,7 +69,7 @@ class jhtechModaalPlugin {
 
 		if( $inline_config ){
 			$dataAttribs = array();  //assoc array of modaal options to be put as data-modaal-* attributes in the markup.
-			if($attrib != '') {
+			if($attribs != '') {
 				$partial = explode(',', $attribs);
 				foreach ($partial as $pair) {
 					$temp = explode(':', $pair);
@@ -94,8 +94,7 @@ class jhtechModaalPlugin {
 		//image gallery
 		//video
 		//iframe
-		
-
+//TODO $id is producing &quot;testing&quot; in the markup
 		//images #http://stackoverflow.com/questions/138313/how-to-extract-img-src-title-and-alt-from-html-using-php
 		if($type === 'image') {
 			$imgs = array();
@@ -106,13 +105,13 @@ class jhtechModaalPlugin {
 			$gallery = esc_attr('gallery-' . $modalNum);
 			$i=0;
 			foreach ($tags as $tag) {
-					$output .= '<a '. ($id !== '' && $i == 0?esc_attr($id) : '') .' href="' . esc_url($tag->getAttribute('src')) . '" class="'. esc_attr($classes) .'" rel="' . esc_attr($gallery) . '" ' . $options . '>' . ($i==0? esc_html($button_text) : ''). '</a>';
+					$output .= '<a '. ($id !== '' && $i == 0?$id : '') .' href="' . esc_url($tag->getAttribute('src')) . '" class="'. esc_attr($classes) .'" rel="' . esc_attr($gallery) . '" ' . $options . '>' . ($i==0? esc_html($button_text) : ''). '</a>';
 					$i++;
 			}
 
 		} else if($type === 'inline') {
 			$contentId = 'inline-modaal-' . $modalNum;
-			$output .= '<a '. ($id !== ''?esc_attr($id) : '') .' href="#' . $contentId . '" class="'. esc_attr($classes) .'" ' . $options . '>' . esc_html($button_text) . '</a>';
+			$output .= '<a '. ($id !== ''?$id : '') .' href="#' . $contentId . '" class="'. esc_attr($classes) .'" ' . $options . '>' . esc_html($button_text) . '</a>';
 			$output .= sprintf('<div id="%s" style="display:none;">%s</div>', $contentId, $content);
 		} else if($type === 'video') {
 			$doc = new DOMDocument();
@@ -120,14 +119,14 @@ class jhtechModaalPlugin {
 
 			$video = $doc->getElementsByTagName('iframe');
 			$src = $video[0]->getAttribute('src');  //currently modaal doesn't support a gallery of videos.
-			$output .= '<a '. ($id !== ''?esc_attr($id) : '') .' href="' . $src . '" class="'. esc_attr($classes) .'" ' . $options . '>' . esc_html($button_text) . '</a>';
+			$output .= '<a '. ($id !== ''?$id : '') .' href="' . $src . '" class="'. esc_attr($classes) .'" ' . $options . '>' . esc_html($button_text) . '</a>';
 		} else if($type === 'iframe') {
 			$doc = new DOMDocument();
 			@$doc->loadHTML($content);
 
 			$iframe = $doc->getElementsByTagName('iframe');
 			$src = $iframe[0]->getAttribute('src');  //currently modaal doesn't support a gallery of videos.
-			$output .= '<a '. ($id !== ''?esc_attr($id) : '') .' href="' . esc_url($src) . '" class="'. esc_attr($classes) .'" ' . $options . '>' . esc_html($button_text) . '</a>';
+			$output .= '<a '. ($id !== ''?$id : '') .' href="' . esc_url($src) . '" class="'. esc_attr($classes) .'" ' . $options . '>' . esc_html($button_text) . '</a>';
 
 		}
 
