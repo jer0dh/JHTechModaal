@@ -21,7 +21,7 @@ class jhtechModaalPlugin {
 		// Set Plugin Path
 		
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue'));
-		
+
 		add_shortcode( 'modaal', array( $this, 'shortcode'));
 		
 		
@@ -33,26 +33,69 @@ class jhtechModaalPlugin {
 		$output = '';
 
 		extract(shortcode_atts(array(
-			'type' 				=> 	'inline',
-			'buttonClass' 		=> 	'button',
-			'buttonText'		=>  '',
-			'buttonImage'		=>	'',
+			'type' 				=> 	'inline',  // inline, image, video, iframe. (ajax, confirm, instagram - not implemented yet)
+			'button_class' 		=> 	'',
+			'button_text'		=>  '',
+			'button_image'		=>	'',
 			'attribs'			=>  '',
+			'inline_config'		=> 	true, // use -data-modaal-*.  If false, must call $().modaal manually with config, especially, if calling js functions for any modaal events
 		), $atts));
 
-		
+		if ($inline_config === 'false') {
+			$inline_config = false;
+		} else {
+			$inline_config = true;
+		}
+
+		$type = strtolower( $type );
+		$options = '';  //markup containing any data-modaal-* options
+		$classes = ($inline_config? 'modaal ' : '') . $button_class;
+
 		//attribs to be string that will be converted to assoc. array - list of modaal options to expand to data-modaal-* attributes
 		// see: http://stackoverflow.com/questions/14133780/explode-a-string-to-associative-array
-		
+
+		if($attribs != '' && $inline_config ){
+			$dataAttribs = array();  //assoc array of modaal options to be put as data-modaal-* attributes in the markup.
+			$partial = explode(',', $attribs);
+			
+			foreach ($partial as $pair) {
+				$temp = explode(':', $pair);
+				$dataAttribs[ $temp[0] ] = $temp[1];
+			}
+			if( $type === 'images') $type = 'image';
+			$dataAttribs['type'] = $type;
+
+			//Create the data-modaal-* options
+
+			foreach($dataAttribs as $key => $value) {
+				$options .= 'data-modaal-' . $key . '="' . $value . '" ';
+			}
+		}
 		//inline
 		//image
 		//image gallery
 		//video
 		//iframe
 		
-		//TODO attribs
-		
-		
+
+		//TODO images #http://stackoverflow.com/questions/138313/how-to-extract-img-src-title-and-alt-from-html-using-php
+		if($type === 'image') {
+			$imgs = array();
+			$doc = new DOMDocument();
+			@$doc->loadHTML($content);
+
+			$tags = $doc->getElementsByTagName('img');
+			$gallery = 'gallery-' . $modalNum;
+			$i=0;
+			foreach ($tags as $tag) {
+					$output .= '<a href="' . $tag->getAttribute('src') . '" class="'. $classes .'" rel="' . $gallery . '" ' . $options . '>' . ($i==0? $button_text : ''). '</a>';
+					$i++;
+			}
+
+		} else if($type === 'inline') {
+			
+		}
+		$modalNum++;  // used if shortcode called again in same post or page.
 		return $output;
 	}
 	

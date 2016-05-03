@@ -8,5 +8,8 @@
 
     });
 
+    window.modaalClose = function() {
+        alert('closed!');
+    } 
     
 })(jQuery);

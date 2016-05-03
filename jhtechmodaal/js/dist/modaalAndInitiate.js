@@ -1133,7 +1133,9 @@
         //removeIf(production)
         console.log('Initiating Modaal');
         //endRemoveIf(production)
-
-        $('.jhtech-modaal-element').modaal();
     });
+
+    window.modaalClose = function () {
+        alert('closed!');
+    };
 })(jQuery);
