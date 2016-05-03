@@ -37,6 +37,7 @@ class jhtechModaalPlugin {
 			'button_image'		=>	'',
 			'attribs'			=>  '',
 			'inline_config'		=> 	true, // use -data-modaal-*.  If false, must call $().modaal manually with config, especially, if calling js functions for any modaal events
+			'id'				=>  '',  // adds an id - could be used to select this modaal using external js if inline_config is false.
 			'width'				=>  '100%', // used if iframe
 			'height'			=>  '300'   // used if iframe
 		), $atts));
@@ -45,6 +46,10 @@ class jhtechModaalPlugin {
 			$inline_config = false;
 		} else {
 			$inline_config = true;
+		}
+		if($id !== '') {
+			$id = sanitize_html_class( $id );
+			$id = 'id="' . $id . '"';
 		}
 
 		$type = strtolower( $type );
@@ -78,7 +83,7 @@ class jhtechModaalPlugin {
 				$dataAttribs['width'] = $width;
 				$dataAttribs['height'] = $height;
 			}
-			//Create the data-modaal-* options
+			//Create the data-modaal-* options and escaping them
 
 			foreach($dataAttribs as $key => $value) {
 				$options .= 'data-modaal-' . $key . '="' .esc_attr($value) . '" ';
@@ -101,28 +106,28 @@ class jhtechModaalPlugin {
 			$gallery = esc_attr('gallery-' . $modalNum);
 			$i=0;
 			foreach ($tags as $tag) {
-					$output .= '<a href="' . esc_url($tag->getAttribute('src')) . '" class="'. esc_attr($classes) .'" rel="' . $gallery . '" ' . $options . '>' . ($i==0? $button_text : ''). '</a>';
+					$output .= '<a '. ($id !== '' && $i == 0?esc_attr($id) : '') .' href="' . esc_url($tag->getAttribute('src')) . '" class="'. esc_attr($classes) .'" rel="' . esc_attr($gallery) . '" ' . $options . '>' . ($i==0? esc_html($button_text) : ''). '</a>';
 					$i++;
 			}
 
 		} else if($type === 'inline') {
-			$id = 'inline-modaal-' . $modalNum;
-			$output .= '<a href="#' . $id . '" class="'. esc_attr($classes) .'" ' . $options . '>' . $button_text . '</a>';
-			$output .= sprintf('<div id="%s" style="display:none;">%s</div>', $id, $content);
+			$contentId = 'inline-modaal-' . $modalNum;
+			$output .= '<a '. ($id !== ''?esc_attr($id) : '') .' href="#' . $contentId . '" class="'. esc_attr($classes) .'" ' . $options . '>' . esc_html($button_text) . '</a>';
+			$output .= sprintf('<div id="%s" style="display:none;">%s</div>', $contentId, $content);
 		} else if($type === 'video') {
 			$doc = new DOMDocument();
 			@$doc->loadHTML($content);
 
 			$video = $doc->getElementsByTagName('iframe');
 			$src = $video[0]->getAttribute('src');  //currently modaal doesn't support a gallery of videos.
-			$output .= '<a href="' . $src . '" class="'. esc_attr($classes) .'" ' . $options . '>' . $button_text . '</a>';
+			$output .= '<a '. ($id !== ''?esc_attr($id) : '') .' href="' . $src . '" class="'. esc_attr($classes) .'" ' . $options . '>' . esc_html($button_text) . '</a>';
 		} else if($type === 'iframe') {
 			$doc = new DOMDocument();
 			@$doc->loadHTML($content);
 
 			$iframe = $doc->getElementsByTagName('iframe');
 			$src = $iframe[0]->getAttribute('src');  //currently modaal doesn't support a gallery of videos.
-			$output .= '<a href="' . $src . '" class="'. esc_attr($classes) .'" ' . $options . '>' . $button_text . '</a>';
+			$output .= '<a '. ($id !== ''?esc_attr($id) : '') .' href="' . esc_url($src) . '" class="'. esc_attr($classes) .'" ' . $options . '>' . esc_html($button_text) . '</a>';
 
 		}
 
