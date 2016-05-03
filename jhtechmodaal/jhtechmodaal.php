@@ -24,8 +24,6 @@ class jhtechModaalPlugin {
 
 		add_shortcode( 'modaal', array( $this, 'shortcode'));
 		
-		
-		
 	}
 	
 	public function shortcode($atts, $content="") {
@@ -39,6 +37,8 @@ class jhtechModaalPlugin {
 			'button_image'		=>	'',
 			'attribs'			=>  '',
 			'inline_config'		=> 	true, // use -data-modaal-*.  If false, must call $().modaal manually with config, especially, if calling js functions for any modaal events
+			'width'				=>  '100%', // used if iframe
+			'height'			=>  '300'   // used if iframe
 		), $atts));
 
 		if ($inline_config === 'false') {
@@ -49,26 +49,39 @@ class jhtechModaalPlugin {
 
 		$type = strtolower( $type );
 		$options = '';  //markup containing any data-modaal-* options
-		$classes = ($inline_config? 'modaal ' : '') . $button_class;
+		$classes = ($inline_config? 'modaal ' : '') . $button_class;  
+
+		//clean wpautop mess
+		//$output .= '<div>before str_replace</div><pre>' . print_r(esc_html($content),true) . '</pre>';
+		$content = str_replace("<br>", "\n", $content);
+		$content = str_replace("<br />", "\n", $content);
+		$content = str_replace("<p></p>", "\n", $content);
+		$content = preg_replace('/^<\/p>/', '', $content);
+		//$output .= '<div>after str_replace</div><pre>' . print_r(esc_html($content),true) . '</pre>';
 
 		//attribs to be string that will be converted to assoc. array - list of modaal options to expand to data-modaal-* attributes
 		// see: http://stackoverflow.com/questions/14133780/explode-a-string-to-associative-array
 
-		if($attribs != '' && $inline_config ){
+		if( $inline_config ){
 			$dataAttribs = array();  //assoc array of modaal options to be put as data-modaal-* attributes in the markup.
-			$partial = explode(',', $attribs);
-			
-			foreach ($partial as $pair) {
-				$temp = explode(':', $pair);
-				$dataAttribs[ $temp[0] ] = $temp[1];
+			if($attrib != '') {
+				$partial = explode(',', $attribs);
+				foreach ($partial as $pair) {
+					$temp = explode(':', $pair);
+					$dataAttribs[$temp[0]] = $temp[1];
+				}
 			}
 			if( $type === 'images') $type = 'image';
 			$dataAttribs['type'] = $type;
 
+			if ($type === 'iframe') {
+				$dataAttribs['width'] = $width;
+				$dataAttribs['height'] = $height;
+			}
 			//Create the data-modaal-* options
 
 			foreach($dataAttribs as $key => $value) {
-				$options .= 'data-modaal-' . $key . '="' . $value . '" ';
+				$options .= 'data-modaal-' . $key . '="' .esc_attr($value) . '" ';
 			}
 		}
 		//inline
@@ -78,23 +91,41 @@ class jhtechModaalPlugin {
 		//iframe
 		
 
-		//TODO images #http://stackoverflow.com/questions/138313/how-to-extract-img-src-title-and-alt-from-html-using-php
+		//images #http://stackoverflow.com/questions/138313/how-to-extract-img-src-title-and-alt-from-html-using-php
 		if($type === 'image') {
 			$imgs = array();
 			$doc = new DOMDocument();
 			@$doc->loadHTML($content);
 
 			$tags = $doc->getElementsByTagName('img');
-			$gallery = 'gallery-' . $modalNum;
+			$gallery = esc_attr('gallery-' . $modalNum);
 			$i=0;
 			foreach ($tags as $tag) {
-					$output .= '<a href="' . $tag->getAttribute('src') . '" class="'. $classes .'" rel="' . $gallery . '" ' . $options . '>' . ($i==0? $button_text : ''). '</a>';
+					$output .= '<a href="' . esc_url($tag->getAttribute('src')) . '" class="'. esc_attr($classes) .'" rel="' . $gallery . '" ' . $options . '>' . ($i==0? $button_text : ''). '</a>';
 					$i++;
 			}
 
 		} else if($type === 'inline') {
-			
+			$id = 'inline-modaal-' . $modalNum;
+			$output .= '<a href="#' . $id . '" class="'. esc_attr($classes) .'" ' . $options . '>' . $button_text . '</a>';
+			$output .= sprintf('<div id="%s" style="display:none;">%s</div>', $id, $content);
+		} else if($type === 'video') {
+			$doc = new DOMDocument();
+			@$doc->loadHTML($content);
+
+			$video = $doc->getElementsByTagName('iframe');
+			$src = $video[0]->getAttribute('src');  //currently modaal doesn't support a gallery of videos.
+			$output .= '<a href="' . $src . '" class="'. esc_attr($classes) .'" ' . $options . '>' . $button_text . '</a>';
+		} else if($type === 'iframe') {
+			$doc = new DOMDocument();
+			@$doc->loadHTML($content);
+
+			$iframe = $doc->getElementsByTagName('iframe');
+			$src = $iframe[0]->getAttribute('src');  //currently modaal doesn't support a gallery of videos.
+			$output .= '<a href="' . $src . '" class="'. esc_attr($classes) .'" ' . $options . '>' . $button_text . '</a>';
+
 		}
+
 		$modalNum++;  // used if shortcode called again in same post or page.
 		return $output;
 	}
