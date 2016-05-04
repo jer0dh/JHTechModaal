@@ -77,6 +77,12 @@ class jhtechModaalPlugin {
 
 		if( $inline_config ){
 			$dataAttribs = array();  //assoc array of modaal options to be put as data-modaal-* attributes in the markup.
+
+			/**
+        	 * Filter to hook into to provide default shortcode attribs but would be overridden by shortcode attribs
+        	 */
+			$dataAttribs = apply_filters( 'jhtech_modaal_default_attribs', $dataAttribs, $id );
+			
 			if($attribs != '') {
 				$partial = explode(',', $attribs);
 				foreach ($partial as $pair) {
@@ -91,6 +97,10 @@ class jhtechModaalPlugin {
 				$dataAttribs['width'] = $width;
 				$dataAttribs['height'] = $height;
 			}
+			/**
+			 * Filter to hook into to override shortcode attribs
+			 */
+			$dataAttribs = apply_filters( 'jhtech_modaal_override_attribs', $dataAttribs, $id );
 			//Create the data-modaal-* options and escaping them
 
 			foreach($dataAttribs as $key => $value) {

@@ -2,14 +2,16 @@
 
 Basic feature list:
 
- * Allows ease of implementing the [Humaan Modaal](http://humaan.com/modaal) in Wordpress.
+ * Allows ease of implementing the [Humaan Modaal](http://humaan.com/modaal) in WordPress.
  * Provides a shortcode to add image, image gallery, inline, and video modals
- * By default uses the inline configuration (data-modaal-*) attributes which can be added via shortcode using a comma delimited string where key and value are separated by a colon.  See example below.
+ * By default uses the inline configuration (`data-modaal-*`) attributes which can be added via shortcode using a comma delimited string where key and value are separated by a colon.  See example below.
  * Able to create the modaal markup without using the inline configuration attributes so it can be manipulated by your own javascript (Recommended if adding own javascript events)
  * Insert images between the shortcode tags using the media library and the shortcode will extract out the image src and produce the modaal markup to make an image gallery modal.
- * Future: May add filter hooks to manipulate markup even more
+ * Added 2 Filter hooks to allow one to 
+   1. provide default values for the inline configuration attributes (`data-modaal-*`)
+   2. override values for the inline configuration attributes (`data-modaal-*`)
 
-### Shortcode Syntax
+## Shortcode Syntax
 ```html
 [modaal ATTRIBUTES] CONTENT [/modaal]
 ```
@@ -29,8 +31,9 @@ where CONTENT can be:
 * A URL to a YouTube or Vimeo video if `type` is `video`.  See above Humaan link regarding recommended video URL syntax.  Since WordPress converts these URLs to an iframe before the shortcode gets called, you can also put in an iframe here and it will extract the `src`.  It will not copy any of the iframe's attributes.
 * An iframe if `type` is `iframe`.  Due to Modaal's markup, it doesn't copy or use the iframe's attributes.  Like a `video` it extracts the `src` URL.
 
+
 ### Example 1 (Inline):
-In a Wordpress Post:
+In a WordPress Post:
 ```html
 [modaal type="inline" button_text="Click Here" attribs="hide-close:true,background:#229933"]
 <p> This is a test </p>
@@ -82,4 +85,23 @@ https://www.youtube.com/watch?v=y685gVGRQ98
 Would produce the following markup:
 ```html
 <a id="testing3" href="https://www.youtube.com/embed/y685gVGRQ98?feature=oembed" class="modaal " data-modaal-type="video">Video</a>
+```
+
+## Filter Hooks
+Both hooks available allow you to alter the Humaan Modaal inline configuration options found on [Modaal's github documentation](https://github.com/humaan/Modaal). They both pass in an associative array where the key is the option name (remember to make underscores into hyphens).
+
+There are two filters hooks.
+  1. `jhtech_modaal_default_attribs` - add any default options and values you want all shortcodes to use.  Any key/value pair in the shortcodes `attribs` attribute will override these default values.
+  2. `jhtech_modaal_override_attribs` - used to override any `attribs` key/value pairs. 
+
+### Example (Filter Hook):
+This example will change the background color of the modal overlay to purple for all [modaal] shortcodes used.  If the shortcode specifies a background color, the shortcode's color will be used instead of purple.  This code is in the theme's `functions.php`:
+```php
+
+add_filter( 'jhtech_modaal_default_attribs', 'jhtech_modaal_add_default' );
+
+function jhtech_modaal_add_default($attribs) {
+	$attribs['background'] = '#770088';
+	return $attribs;
+}
 ```
