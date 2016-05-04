@@ -105,3 +105,8 @@ function jhtech_modaal_add_default($attribs) {
 	return $attribs;
 }
 ```
+
+## Installation
+  1. Copy the jhtechmodaal folder into your WordPress's `\wp-content\plugins` folder.
+  2. Go to your Plugins in the WordPress dashboard and Activate this plugin.
+  3. Add your `[modaal]` shortcode in your pages and posts where you want the link to open the modal.
