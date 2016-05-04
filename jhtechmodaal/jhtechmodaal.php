@@ -25,6 +25,14 @@ class jhtechModaalPlugin {
 		add_shortcode( 'modaal', array( $this, 'shortcode'));
 		
 	}
+
+	public function enqueue() {
+
+		wp_enqueue_script('modaal', plugins_url( '/js/dist/modaalAndInitiate.min.js', __FILE__), array('jquery'),'1.0.0',true);
+		wp_enqueue_style('modaalcss', plugins_url( '/css/modaal.css', __FILE__));
+
+
+	}
 	
 	public function shortcode($atts, $content="") {
 		static $modalNum = 0;
@@ -38,7 +46,7 @@ class jhtechModaalPlugin {
 			'attribs'			=>  '',
 			'inline_config'		=> 	true, // use -data-modaal-*.  If false, must call $().modaal manually with config, especially, if calling js functions for any modaal events
 			'id'				=>  '',  // adds an id - could be used to select this modaal using external js if inline_config is false.
-			'width'				=>  '100%', // used if iframe
+			'width'				=>  '400', // used if iframe
 			'height'			=>  '300'   // used if iframe
 		), $atts));
 
@@ -89,58 +97,45 @@ class jhtechModaalPlugin {
 				$options .= 'data-modaal-' . $key . '="' .esc_attr($value) . '" ';
 			}
 		}
-		//inline
-		//image
-		//image gallery
-		//video
-		//iframe
-//TODO $id is producing &quot;testing&quot; in the markup
+
 		//images #http://stackoverflow.com/questions/138313/how-to-extract-img-src-title-and-alt-from-html-using-php
 		if($type === 'image') {
 			$imgs = array();
 			$doc = new DOMDocument();
 			@$doc->loadHTML($content);
-
 			$tags = $doc->getElementsByTagName('img');
 			$gallery = esc_attr('gallery-' . $modalNum);
 			$i=0;
 			foreach ($tags as $tag) {
-					$output .= '<a '. ($id !== '' && $i == 0?$id : '') .' href="' . esc_url($tag->getAttribute('src')) . '" class="'. esc_attr($classes) .'" rel="' . esc_attr($gallery) . '" ' . $options . '>' . ($i==0? esc_html($button_text) : ''). '</a>';
+					$output .= '<a '. ($i == 0?$id : '') .' href="' . esc_url($tag->getAttribute('src')) . '" class="'. esc_attr($classes) .'" rel="' . esc_attr($gallery) . '" ' . $options . '>' . ($i==0? esc_html($button_text) : ''). '</a>';
 					$i++;
 			}
 
 		} else if($type === 'inline') {
 			$contentId = 'inline-modaal-' . $modalNum;
-			$output .= '<a '. ($id !== ''?$id : '') .' href="#' . $contentId . '" class="'. esc_attr($classes) .'" ' . $options . '>' . esc_html($button_text) . '</a>';
+			$output .= '<a '. $id  .' href="#' . $contentId . '" class="'. esc_attr($classes) .'" ' . $options . '>' . esc_html($button_text) . '</a>';
 			$output .= sprintf('<div id="%s" style="display:none;">%s</div>', $contentId, $content);
+			
 		} else if($type === 'video') {
 			$doc = new DOMDocument();
 			@$doc->loadHTML($content);
-
 			$video = $doc->getElementsByTagName('iframe');
 			$src = $video[0]->getAttribute('src');  //currently modaal doesn't support a gallery of videos.
-			$output .= '<a '. ($id !== ''?$id : '') .' href="' . $src . '" class="'. esc_attr($classes) .'" ' . $options . '>' . esc_html($button_text) . '</a>';
+			$output .= '<a '. $id .' href="' . $src . '" class="'. esc_attr($classes) .'" ' . $options . '>' . esc_html($button_text) . '</a>';
+			
 		} else if($type === 'iframe') {
 			$doc = new DOMDocument();
 			@$doc->loadHTML($content);
-
 			$iframe = $doc->getElementsByTagName('iframe');
 			$src = $iframe[0]->getAttribute('src');  //currently modaal doesn't support a gallery of videos.
-			$output .= '<a '. ($id !== ''?$id : '') .' href="' . esc_url($src) . '" class="'. esc_attr($classes) .'" ' . $options . '>' . esc_html($button_text) . '</a>';
+			$output .= '<a '. $id .' href="' . esc_url($src) . '" class="'. esc_attr($classes) .'" ' . $options . '>' . esc_html($button_text) . '</a>';
 
 		}
 
 		$modalNum++;  // used if shortcode called again in same post or page.
 		return $output;
 	}
-	
-	public function enqueue() {
 
-		wp_enqueue_script('modaal', plugins_url( '/js/dist/modaalAndInitiate.min.js', __FILE__), array('jquery'),'1.0.0',true);
-		wp_enqueue_style('modaalcss', plugins_url( '/css/modaal.css', __FILE__));
-
-
-	}
 
 	/**
 	 * Activate Plugin

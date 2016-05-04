@@ -2,17 +2,37 @@
 
 Basic feature list:
 
- * Allows ease of implementing the [Humaan Modaal](www.humaan.com/modaal) in Wordpress.
+ * Allows ease of implementing the [Humaan Modaal](http://humaan.com/modaal) in Wordpress.
  * Provides a shortcode to add image, image gallery, inline, and video modals
  * By default uses the inline configuration (data-modaal-*) attributes which can be added via shortcode using a comma delimited string where key and value are separated by a colon.  See example below.
  * Able to create the modaal markup without using the inline configuration attributes so it can be manipulated by your own javascript (Recommended if adding own javascript events)
  * Insert images between the shortcode tags using the media library and the shortcode will extract out the image src and produce the modaal markup to make an image gallery modal.
  * Future: May add filter hooks to manipulate markup even more
 
+### Shortcode Syntax
+```html
+[modaal ATTRIBUTES] CONTENT [/modaal]
+```
+where ATTRIBUTES can be:
+ * `type` : 'inline', 'image', 'video', or 'iframe'.  Default: 'inline'
+ * `button_class` : adds this value to class attribute on `<a>` tag.
+ * `button_text` : becomes the link to click on to show the modal.
+ * `attribs` : a comma delimited string where key and value are separated by a colon. The keys are the same configuration options found on [Modaal's github documentation](https://github.com/humaan/Modaal).  Remember replace the underscores with hyphens. This will produce the `data-modaal-` attributes in the markup. NOTE: Events do not work here
+ * `inline_config` : `true` or `false` - If `false`, must call `$().modaal` manually with the config (`attribs` will not work), especially used if needing to call js functions for any modaal events.  Default: `true`
+ * `id` : adds an `id` attribute to the `<a>` tag.  Could be used to target this modal when `inline_config` is `false`.
+ * `width` : used only if `type` is `iframe`.  Default `400`
+ * `height` : used ony if `type` is `iframe`. Default `300`
+ 
+where CONTENT can be:
+* any html/text to be shown if `type` is `inline`.  This content will be wrapped in a `<div>` with an inline style of `display:none;`
+* A single or multiple `<img>` tags if `type` is `image`
+* A URL to a YouTube or Vimeo video if `type` is `video`.  See above Humaan link regarding recommended video URL syntax.  Since WordPress converts these URLs to an iframe before the shortcode gets called, you can also put in an iframe here and it will extract the `src`.  It will not copy any of the iframe's attributes.
+* An iframe if `type` is `iframe`.  Due to Modaal's markup, it doesn't copy or use the iframe's attributes.  Like a `video` it extracts the `src` URL.
+
 ### Example 1 (Inline):
 In a Wordpress Post:
 ```html
-[modaal type="inline" button_text="Click Here" attribs="hide-close:true,background:#229933,before-open:modaalClose"]
+[modaal type="inline" button_text="Click Here" attribs="hide-close:true,background:#229933"]
 <p> This is a test </p>
 <img src="https://staging3.jhtechservices.com/wp-content/uploads/coffee638x344-300x1611-150x150.jpg" alt="coffee638x344-300x161" width="150" height="150" class="alignnone" />
 [/modaal]
@@ -50,4 +70,16 @@ Would produce the following markup:
 <a href="https://jhtechservices.com/wp-content/uploads/jscircuitry-300x242.jpg" class="modaal " rel="gallery-0" data-modaal-type="image"></a>
 
 <a href="https://staging3.jhtechservices.com/wp-content/uploads/HTML5_css3_circuitry-300x144.jpg" class="modaal " rel="gallery-0" data-modaal-type="image"></a>
+```
+
+### Example 3 (video):
+In a WordPress Post:
+```html
+[modaal type="video" button_text="Video" id="testing3"]
+https://www.youtube.com/watch?v=y685gVGRQ98
+[/modaal]
+```
+Would produce the following markup:
+```html
+<a id="testing3" href="https://www.youtube.com/embed/y685gVGRQ98?feature=oembed" class="modaal " data-modaal-type="video">Video</a>
 ```
