@@ -10,6 +10,8 @@ Basic feature list:
  * Added 2 Filter hooks to allow one to 
    1. provide default values for the inline configuration attributes (`data-modaal-*`)
    2. override values for the inline configuration attributes (`data-modaal-*`)
+ * modaal.js is enqueued only if shortcode is used on page or post.
+ * create a link to modal using image or html by nested shortcode `[modaal_link]` 
 
 ## Shortcode Syntax
 ```html
@@ -85,6 +87,28 @@ https://www.youtube.com/watch?v=y685gVGRQ98
 Would produce the following markup:
 ```html
 <a id="testing3" href="https://www.youtube.com/embed/y685gVGRQ98?feature=oembed" class="modaal " data-modaal-type="video">Video</a>
+```
+## Optional nested shortcode to add image or html links
+```html
+[modaal ATTRIBUTES] [modaal_link] HTML-CONTENT [/modaal_link] CONTENT [/modaal]
+```
+where HTML-CONTENT can be html that will be surrounded by the `<a>` tags so it will be clickable and open the modal.  (NOTE: do not add any `<a>` tags in this HTML)
+
+### Example of [modaal_link]
+In a WordPress post
+```html
+[modaal type="image" button_text="Click" id="testing"]
+[modaal_link]<img src="https://jhtechservices.com/wp-content/uploads/GitHub-Mark-64px.png" alt="GitHub-Mark-64px" width="64" height="64" class="alignnone size-full wp-image-910" />[/modaal_link]
+<img src="https://jhtechservices.com/wp-content/uploads/wpcircuitry-285x300.jpg" alt="wpcircuitry" width="285" height="300" class="alignnone size-medium wp-image-913" />
+<img src="https://jhtechservices.com/wp-content/uploads/GitHub-Mark-64px.png" alt="GitHub-Mark-64px" width="64" height="64" class="alignnone size-full wp-image-910" />
+[/modaal]
+```
+Would produce the following markup:
+```html
+<a id="testing" href="https://jhtechservices.com/wp-content/uploads/wpcircuitry-285x300.jpg" class="modaal " rel="gallery-2" data-modaal-type="image">
+   <img src="https://jhtechservices.com/wp-content/uploads/GitHub-Mark-64px.png" alt="GitHub-Mark-64px" class="alignnone size-full wp-image-910" height="64" width="64">
+</a>
+<a href="https://jhtechservices.com/wp-content/uploads/GitHub-Mark-64px.png" class="modaal " rel="gallery-2" data-modaal-type="image"></a>
 ```
 
 ## Filter Hooks

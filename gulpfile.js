@@ -52,11 +52,11 @@ var themeName = pkg.name;
 var styleSrc = 'style.scss';
 var styleDest = 'style.css';
 var production = false;
-var jsScripts = ['modaal.js', 'initiate.js'];
+var jsScripts = ['modaal.js'];
 var jsScriptsWithPath = jsScripts.map( function (s) {
     return themeName + '/js/src/' + s;
 });
-var jsScriptsName = 'modaalAndInitiate.js'
+var jsScriptsName = 'modaal.js';
 
 
 //TODO - add gulp-new to imagemin task

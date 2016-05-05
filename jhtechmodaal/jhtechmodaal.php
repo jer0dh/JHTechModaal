@@ -32,10 +32,9 @@ class jhtechModaalPlugin {
 	public function enqueue() {
 
 		//https://mikejolley.com/2013/12/02/sensible-script-enqueuing-shortcodes/
-		wp_register_script('modaal', plugins_url( '/js/dist/modaalAndInitiate.min.js', __FILE__), array('jquery'),'1.0.0',true);
+		wp_register_script('modaal', plugins_url( '/js/dist/modaal.min.js', __FILE__), array('jquery'),'1.0.0',true);
 		
-		wp_enqueue_style('modaalcss', plugins_url( '/css/modaal.css', __FILE__));
-
+		wp_enqueue_style('modaalcss', plugins_url( '/css/modaal.min.css', __FILE__));
 
 	}
 	
