@@ -12,6 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 } // Exit if accessed directly
 
+//TODO look at nested shortcodes to be able to add html/images as the link to the modal.
+//TODO look at adding thumbnails of multiple images of image gallery.
 
 class jhtechModaalPlugin {
 
@@ -23,12 +25,15 @@ class jhtechModaalPlugin {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue'));
 
 		add_shortcode( 'modaal', array( $this, 'shortcode'));
+		add_shortcode( 'modaal_link', array( $this, 'shortcode_link') );
 		
 	}
 
 	public function enqueue() {
 
-		wp_enqueue_script('modaal', plugins_url( '/js/dist/modaalAndInitiate.min.js', __FILE__), array('jquery'),'1.0.0',true);
+		//https://mikejolley.com/2013/12/02/sensible-script-enqueuing-shortcodes/
+		wp_register_script('modaal', plugins_url( '/js/dist/modaalAndInitiate.min.js', __FILE__), array('jquery'),'1.0.0',true);
+		
 		wp_enqueue_style('modaalcss', plugins_url( '/css/modaal.css', __FILE__));
 
 
@@ -38,6 +43,8 @@ class jhtechModaalPlugin {
 		static $modalNum = 0;
 		$output = '';
 
+		wp_enqueue_script('modaal');
+		
 		extract(shortcode_atts(array(
 			'type' 				=> 	'inline',  // inline, image, video, iframe. (ajax, confirm, instagram - not implemented yet)
 			'button_class' 		=> 	'',
@@ -61,20 +68,43 @@ class jhtechModaalPlugin {
 		}
 
 		$type = strtolower( $type );
-		$options = '';  //markup containing any data-modaal-* options
-		$classes = ($inline_config? 'modaal ' : '') . $button_class;  
+		$options = '';  //will contain markup of data-modaal-* options
+		$classes = ($inline_config? 'modaal ' : '') . $button_class;  //class modaal used by modaal.js to initialize modaal with inline configuration attributes
 
-		//clean wpautop mess
+		/*
+		 * clean wpautop mess
+		 */
 		//$output .= '<div>before str_replace</div><pre>' . print_r(esc_html($content),true) . '</pre>';
 		$content = str_replace("<br>", "\n", $content);
 		$content = str_replace("<br />", "\n", $content);
 		$content = str_replace("<p></p>", "\n", $content);
 		$content = preg_replace('/^<\/p>/', '', $content);
+		$content = preg_replace('/<p>\[/', '[', $content);
 		//$output .= '<div>after str_replace</div><pre>' . print_r(esc_html($content),true) . '</pre>';
 
-		//attribs to be string that will be converted to assoc. array - list of modaal options to expand to data-modaal-* attributes
-		// see: http://stackoverflow.com/questions/14133780/explode-a-string-to-associative-array
-
+				
+		/*
+		 * Check to see if there is an internal shortcode modaal_link containing the html that will be the inner content of the <a> tag
+		 * If so, grab the shortcode, run it and put the results into $button_text.  Next remove the modaal_link shortcode from $content
+		 */
+		if ( has_shortcode( $content, 'modaal_link' ) ) {
+			// from http://stackoverflow.com/questions/6290810/return-only-the-shortcode-from-post
+			$pattern = get_shortcode_regex();
+			preg_match('/'.$pattern.'/s', $content, $matches);
+			if (is_array($matches) && $matches[2] == 'modaal_link') {
+				$shortcode = $matches[0];
+				$button_text = do_shortcode($shortcode);  //override any value in the attribute 
+			}
+			//now remove the shortcode from the $content
+			$content = strip_shortcodes( $content );
+		}
+		
+		
+		/*
+		 * If we are adding the inline configuration attributes (data-modaal-*), then parse the 'attribs' attribute, and 
+		 * create an associative array called $dataAttribs.  Apply filters on the $dataAttribs so user can provide for default
+		 * values or override the values in the shortcode attribs
+		 */
 		if( $inline_config ){
 			$dataAttribs = array();  //assoc array of modaal options to be put as data-modaal-* attributes in the markup.
 
@@ -104,7 +134,7 @@ class jhtechModaalPlugin {
 			//Create the data-modaal-* options and escaping them
 
 			foreach($dataAttribs as $key => $value) {
-				$options .= 'data-modaal-' . $key . '="' .esc_attr($value) . '" ';
+				$options .= 'data-modaal-' . esc_attr($key) . '="' .esc_attr($value) . '" ';
 			}
 		}
 
@@ -117,13 +147,13 @@ class jhtechModaalPlugin {
 			$gallery = esc_attr('gallery-' . $modalNum);
 			$i=0;
 			foreach ($tags as $tag) {
-					$output .= '<a '. ($i == 0?$id : '') .' href="' . esc_url($tag->getAttribute('src')) . '" class="'. esc_attr($classes) .'" rel="' . esc_attr($gallery) . '" ' . $options . '>' . ($i==0? esc_html($button_text) : ''). '</a>';
+					$output .= '<a '. ($i == 0?$id : '') .' href="' . esc_url($tag->getAttribute('src')) . '" class="'. esc_attr($classes) .'" rel="' . esc_attr($gallery) . '" ' . $options . '>' . ($i==0? $button_text : ''). '</a>';
 					$i++;
 			}
 
 		} else if($type === 'inline') {
 			$contentId = 'inline-modaal-' . $modalNum;
-			$output .= '<a '. $id  .' href="#' . $contentId . '" class="'. esc_attr($classes) .'" ' . $options . '>' . esc_html($button_text) . '</a>';
+			$output .= '<a '. $id  .' href="#' . $contentId . '" class="'. esc_attr($classes) .'" ' . $options . '>' . $button_text . '</a>';
 			$output .= sprintf('<div id="%s" style="display:none;">%s</div>', $contentId, $content);
 			
 		} else if($type === 'video') {
@@ -131,21 +161,24 @@ class jhtechModaalPlugin {
 			@$doc->loadHTML($content);
 			$video = $doc->getElementsByTagName('iframe');
 			$src = $video[0]->getAttribute('src');  //currently modaal doesn't support a gallery of videos.
-			$output .= '<a '. $id .' href="' . $src . '" class="'. esc_attr($classes) .'" ' . $options . '>' . esc_html($button_text) . '</a>';
+			$output .= '<a '. $id .' href="' . $src . '" class="'. esc_attr($classes) .'" ' . $options . '>' . $button_text . '</a>';
 			
 		} else if($type === 'iframe') {
 			$doc = new DOMDocument();
 			@$doc->loadHTML($content);
 			$iframe = $doc->getElementsByTagName('iframe');
 			$src = $iframe[0]->getAttribute('src');  //currently modaal doesn't support a gallery of videos.
-			$output .= '<a '. $id .' href="' . esc_url($src) . '" class="'. esc_attr($classes) .'" ' . $options . '>' . esc_html($button_text) . '</a>';
+			$output .= '<a '. $id .' href="' . esc_url($src) . '" class="'. esc_attr($classes) .'" ' . $options . '>' . $button_text . '</a>';
 
 		}
 
 		$modalNum++;  // used if shortcode called again in same post or page.
 		return $output;
 	}
-
+	
+	public function shortcode_link ($atts, $content="") {
+		return $content;
+	}
 
 	/**
 	 * Activate Plugin
