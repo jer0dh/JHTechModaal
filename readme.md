@@ -33,13 +33,14 @@ where CONTENT can be:
 * A URL to a YouTube or Vimeo video if `type` is `video`.  See above Humaan link regarding recommended video URL syntax.  Since WordPress converts these URLs to an iframe before the shortcode gets called, you can also put in an iframe here and it will extract the `src`.  It will not copy any of the iframe's attributes.
 * An iframe if `type` is `iframe`.  Due to Modaal's markup, it doesn't copy or use the iframe's attributes.  Like a `video` it extracts the `src` URL.
 
+#### See Demo of examples [here](https://jhtechservices.com/2016/05/using-humaan-modaal-in-wordpress/)
 
 ### Example 1 (Inline):
 In a WordPress Post:
 ```html
 [modaal type="inline" button_text="Click Here" attribs="hide-close:true,background:#229933"]
 <p> This is a test </p>
-<img src="https://staging3.jhtechservices.com/wp-content/uploads/coffee638x344-300x1611-150x150.jpg" alt="coffee638x344-300x161" width="150" height="150" class="alignnone" />
+<img src="https://jhtechservices.com/wp-content/uploads/coffee638x344-300x1611-150x150.jpg" alt="coffee638x344-300x161" width="150" height="150" class="alignnone" />
 [/modaal]
 ```
 Would produce the following markup.
@@ -56,13 +57,13 @@ In a WordPress Post:
 ```html
 [modaal type="image" button_text="Click"]
 
-<img src="https://staging3.jhtechservices.com/wp-content/uploads/wpcircuitry-285x300.jpg" alt="wpcircuitry" width="285" height="300" class="alignnone size-medium wp-image-913" />
+<img src="https://jhtechservices.com/wp-content/uploads/wpcircuitry-285x300.jpg" alt="wpcircuitry" width="285" height="300" class="alignnone size-medium wp-image-913" />
 
-<img src="https://staging3.jhtechservices.com/wp-content/uploads/GitHub-Mark-64px.png" alt="GitHub-Mark-64px" width="64" height="64" class="alignnone size-full wp-image-910" />
+<img src="https://jhtechservices.com/wp-content/uploads/GitHub-Mark-64px.png" alt="GitHub-Mark-64px" width="64" height="64" class="alignnone size-full wp-image-910" />
 
-<img src="https://staging3.jhtechservices.com/wp-content/uploads/jscircuitry-300x242.jpg" alt="jscircuitry" width="300" height="242" class="alignnone size-medium wp-image-912" />
+<img src="https://jhtechservices.com/wp-content/uploads/jscircuitry-300x242.jpg" alt="jscircuitry" width="300" height="242" class="alignnone size-medium wp-image-912" />
 
-<img src="https://staging3.jhtechservices.com/wp-content/uploads/HTML5_css3_circuitry-300x144.jpg" alt="HTML5_css3_circuitry" width="300" height="144" class="alignnone size-medium wp-image-911" />
+<img src="https://jhtechservices.com/wp-content/uploads/HTML5_css3_circuitry-300x144.jpg" alt="HTML5_css3_circuitry" width="300" height="144" class="alignnone size-medium wp-image-911" />
 
 [/modaal]
 ```
@@ -74,7 +75,7 @@ Would produce the following markup:
 
 <a href="https://jhtechservices.com/wp-content/uploads/jscircuitry-300x242.jpg" class="modaal " rel="gallery-0" data-modaal-type="image"></a>
 
-<a href="https://staging3.jhtechservices.com/wp-content/uploads/HTML5_css3_circuitry-300x144.jpg" class="modaal " rel="gallery-0" data-modaal-type="image"></a>
+<a href="https://jhtechservices.com/wp-content/uploads/HTML5_css3_circuitry-300x144.jpg" class="modaal " rel="gallery-0" data-modaal-type="image"></a>
 ```
 
 ### Example 3 (video):
